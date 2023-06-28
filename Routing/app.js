@@ -16,7 +16,7 @@ const server = http.createServer((req, res) => {
     switch (req.url) {
         case '/':
         case '/home':
-        case '/index.html':
+        case '/index.ejs':
             basePath = createPath('index');
             res.statusCode = 200;
             break;
