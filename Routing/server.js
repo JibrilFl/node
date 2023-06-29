@@ -1,5 +1,24 @@
 const express = require('express');
 const path = require('path');
+const morgan = require('morgan');
+const { Client } = require("pg");
+
+const db = 'postgresql://jibril:Yw21SbSYPiF4dFoH9vNyHg@node-blog-8661.8nj.cockroachlabs.cloud:26257/posts?sslmode=verify-full';
+
+const client = new Client(db);
+
+(async () => {
+    await client.connect();
+    try {
+        const results = await client.query("SELECT NOW()");
+        console.log(results);
+        console.log('Успешное подключение!');
+    } catch (err) {
+        console.error("error executing query:", err);
+    } finally {
+        client.end();
+    }
+})();
 
 const app = express();
 
@@ -12,6 +31,10 @@ const createPath = (page) => path.resolve(__dirname, 'ejs-views', `${page}.ejs`)
 app.listen(PORT, 'localhost', (error) => {
     error ? console.log(error) : console.log(`listening port ${PORT}`);
 });
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
+
+app.use(express.static('styles'));
 
 app.get('/', (req, res) => {
     const title = 'Home';
@@ -37,8 +60,15 @@ app.get('/contacts', (req, res) => {
 
 app.get('/posts/:id', (req, res) => {
     const title = 'Post';
+    const post = {
+        id: '1',
+        text: 'Lorem ipsum dolor sit amet',
+        title: 'post title',
+        date: '28.06.2023',
+        author: 'Alex'
+    };
 
-    res.render(createPath('post'), {title});
+    res.render(createPath('post'), {title, post});
 });
 
 app.get('/posts', (req, res) => {
