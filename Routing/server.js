@@ -1,24 +1,15 @@
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
-const { Client } = require("pg");
+const mysql = require('mysql');
 
-const db = 'postgresql://jibril:Yw21SbSYPiF4dFoH9vNyHg@node-blog-8661.8nj.cockroachlabs.cloud:26257/posts?sslmode=verify-full';
-
-const client = new Client(db);
-
-(async () => {
-    await client.connect();
-    try {
-        const results = await client.query("SELECT NOW()");
-        console.log(results);
-        console.log('Успешное подключение!');
-    } catch (err) {
-        console.error("error executing query:", err);
-    } finally {
-        client.end();
-    }
-})();
+// конфигурация
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '000000',
+    database: 'node_blog'
+});
 
 const app = express();
 
@@ -33,6 +24,8 @@ app.listen(PORT, 'localhost', (error) => {
 });
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
+
+app.use(express.urlencoded({extended: false}));
 
 app.use(express.static('styles'));
 
@@ -74,7 +67,17 @@ app.get('/posts/:id', (req, res) => {
 app.get('/posts', (req, res) => {
     const title = 'Posts';
 
-    res.render(createPath('posts'), {title});
+    const posts = [
+        {
+            id: '1',
+            text: 'Lorem ipsum dolor sit amet',
+            title: 'post title',
+            date: '28.06.2023',
+            author: 'Alex'
+        }
+    ];
+
+    res.render(createPath('posts'), {title, posts});
 });
 
 app.get('/add-post', (req, res) => {
@@ -85,6 +88,24 @@ app.get('/add-post', (req, res) => {
 
 app.get('/about-us', (req, res) => {
     res.redirect('/contacts');
+});
+
+app.post('/add-post', (req, res) => {
+    const {title, author, text} = req.body;
+
+    const query = `INSERT INTO posts(text, title, author) VALUES('${text}', '${title}', '${author}')`;
+
+    connection.query(query, (err, result) => {
+
+        if (err) {
+            console.log(err);
+            res.render(createPath('error'), {title: 'Error'})
+        }
+
+        console.log(result);
+    });
+
+    connection.end();
 });
 
 app.use((req, res) => {
