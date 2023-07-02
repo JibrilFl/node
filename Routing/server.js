@@ -1,15 +1,7 @@
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
-const mysql = require('mysql');
-
-// конфигурация
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '000000',
-    database: 'node_blog'
-});
+const connection = require('./models/post');
 
 const app = express();
 
