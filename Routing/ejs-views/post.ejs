@@ -5,12 +5,12 @@
 <%- include('./partials/nav.ejs') %>
 <article>
     <div class="info">
-        <span><%= post.date %></span>
-        <span><%= post.author %></span>
+        <span><%= post[0].reg_date.toLocaleDateString() %></span>
+        <span><%= post[0].author %></span>
     </div>
-    <h1><%= post.title %></h1>
+    <h1><%= post[0].title %></h1>
     <p>
-        <%= post.text %>
+        <%= post[0].text %>
     </p>
 </article>
 </body>

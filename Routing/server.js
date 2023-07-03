@@ -34,42 +34,49 @@ app.get('/home', (req, res) => {
 app.get('/contacts', (req, res) => {
     const title = 'Contacts';
 
-    const contacts = [
-        {name: 'VK', link: '#'},
-        {name: 'Youtube', link: '#'},
-        {name: 'GitHub', link: '#'}
-    ];
+    const query = `SELECT * FROM contacts`;
 
-    res.render(createPath('contacts'), {contacts, title});
+    connection.query(query, (err, contacts) => {
+
+        if (err) {
+            console.log(err);
+            res.render(createPath('error'), {title: 'Error'})
+        }
+
+        res.render(createPath('contacts'), {contacts, title});
+    });
 });
 
 app.get('/posts/:id', (req, res) => {
     const title = 'Post';
-    const post = {
-        id: '1',
-        text: 'Lorem ipsum dolor sit amet',
-        title: 'post title',
-        date: '28.06.2023',
-        author: 'Alex'
-    };
 
-    res.render(createPath('post'), {title, post});
+    const query = `SELECT * FROM posts WHERE id=${req.params.id}`;
+
+    connection.query(query, (err, post) => {
+
+        if (err) {
+            console.log(err);
+            res.render(createPath('error'), {title: 'Error'})
+        }
+
+        res.render(createPath('post'), {title, post});
+    });
 });
 
 app.get('/posts', (req, res) => {
     const title = 'Posts';
 
-    const posts = [
-        {
-            id: '1',
-            text: 'Lorem ipsum dolor sit amet',
-            title: 'post title',
-            date: '28.06.2023',
-            author: 'Alex'
-        }
-    ];
+    const query = `SELECT * FROM posts ORDER BY reg_date DESC`;
 
-    res.render(createPath('posts'), {title, posts});
+    connection.query(query, (err, posts) => {
+
+        if (err) {
+            console.log(err);
+            res.render(createPath('error'), {title: 'Error'})
+        }
+
+        res.render(createPath('posts'), {title, posts});
+    });
 });
 
 app.get('/add-post', (req, res) => {
@@ -87,23 +94,23 @@ app.post('/add-post', (req, res) => {
 
     const query = `INSERT INTO posts(text, title, author) VALUES('${text}', '${title}', '${author}')`;
 
-    connection.query(query, (err, result) => {
+    connection.query(query, (err) => {
 
         if (err) {
             console.log(err);
             res.render(createPath('error'), {title: 'Error'})
         }
 
-        console.log(result);
+        res.redirect('/posts');
     });
 
-    connection.end();
+
 });
 
 app.use((req, res) => {
     const title = 'Error page';
 
     res
-        .status(404)
-        .render(createPath('error'), {title});
+    .status(404)
+    .render(createPath('error'), {title});
 });
