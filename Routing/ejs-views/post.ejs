@@ -3,15 +3,39 @@
 <%- include('./partials/head.ejs') %>
 <body>
 <%- include('./partials/nav.ejs') %>
-<article>
+<article class="post">
     <div class="info">
-        <span><%= post[0].reg_date.toLocaleDateString() %></span>
+        <span><%= post[0].reg_date.toLocaleDateString() || 'No date' %></span>
         <span><%= post[0].author %></span>
     </div>
     <h1><%= post[0].title %></h1>
     <p>
         <%= post[0].text %>
     </p>
+    <a href="/edit/<%= post[0].id %>" class="btn-edit">
+        <i class="fas fa-edit"></i>
+    </a>
+    <button class="btn-delete" data-id="<%= post[0].id %>">
+        <i class="fas fa-trash-alt"></i>
+    </button>
 </article>
+
+<script>
+    document.querySelectorAll('.btn-delete').forEach((item) => {
+        item.addEventListener('click', function(e) {
+            let btn = e.target.closest('button');
+            if (btn) {
+                let id = btn.dataset.id;
+
+                fetch(`/posts/${id}`, {
+                    method: 'DELETE'
+                }).then(() => {
+                    window.location.href = '/posts';
+                });
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

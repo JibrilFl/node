@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 const connection = require('./models/post');
+const methodOverride = require('method-override')
 
 const app = express();
 
@@ -15,11 +16,13 @@ app.listen(PORT, 'localhost', (error) => {
     error ? console.log(error) : console.log(`listening port ${PORT}`);
 });
 
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms')); // мидлвар логгер morgan
 
 app.use(express.urlencoded({extended: false}));
 
-app.use(express.static('styles'));
+app.use(express.static('styles')); // Разрешаем браузеру доступ к файлам в папке styles
+
+app.use(methodOverride('_method'));
 
 app.get('/', (req, res) => {
     const title = 'Home';
@@ -47,6 +50,10 @@ app.get('/contacts', (req, res) => {
     });
 });
 
+app.get('/about-us', (req, res) => {
+    res.redirect('/contacts');
+});
+
 app.get('/posts/:id', (req, res) => {
     const title = 'Post';
 
@@ -60,6 +67,56 @@ app.get('/posts/:id', (req, res) => {
         }
 
         res.render(createPath('post'), {title, post});
+    });
+});
+
+app.delete('/posts/:id', (req, res) => {
+    const title = 'Post';
+
+    const query = `DELETE FROM posts WHERE id=${req.params.id}`;
+
+    connection.query(query, (err, post) => {
+
+        if (err) {
+            console.log(err);
+            res.render(createPath('error'), {title: 'Error'})
+        }
+
+        res.sendStatus(200);
+    });
+});
+
+app.get('/edit/:id', (req, res) => {
+    const title = 'Edit post';
+
+    const query = `SELECT * FROM posts WHERE id=${req.params.id}`;
+
+    connection.query(query, (err, post) => {
+
+        if (err) {
+            console.log(err);
+            res.render(createPath('error'), {title: 'Error'})
+        }
+
+        res.render(createPath('edit-post'), {title, post});
+    });
+});
+
+app.put('/edit/:id', (req, res) => {
+    const {title, author, text} = req.body;
+    const {id} = req.params;
+
+    const query = `UPDATE posts SET title=?, text=?, author=?  WHERE id=${id}`;
+    const data = [title, text, author];
+
+    connection.query(query, data, (err, post) => {
+
+        if (err) {
+            console.log(err);
+            res.render(createPath('error'), {title: 'Error'})
+        }
+
+        res.redirect(`/posts/${id}`);
     });
 });
 
@@ -83,10 +140,6 @@ app.get('/add-post', (req, res) => {
     const title = 'Add post';
 
     res.render(createPath('add-post'), {title});
-});
-
-app.get('/about-us', (req, res) => {
-    res.redirect('/contacts');
 });
 
 app.post('/add-post', (req, res) => {

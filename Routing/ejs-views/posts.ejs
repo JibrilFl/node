@@ -14,13 +14,34 @@
                     </h2>
                     <p><%= text %></p>
                     <div class="info">
-                        <span><%= reg_date.toLocaleDateString() %></span>
+                        <span><%= reg_date.toLocaleDateString() || 'No date' %></span>
                         <span><%= author %></span>
                     </div>
+                    <button class="btn-delete" data-id="<%= id %>">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </article>
             </li>
         <% }) %>
     <% } %>
 </ul>
+
+<script>
+    document.querySelectorAll('.btn-delete').forEach((item) => {
+        item.addEventListener('click', function(e) {
+            let btn = e.target.closest('button');
+            if (btn) {
+                let id = btn.dataset.id;
+
+                fetch(`/posts/${id}`, {
+                    method: 'DELETE'
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
