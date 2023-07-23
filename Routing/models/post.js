@@ -1,11 +1,12 @@
 const mysql = require('mysql');
+require('dotenv').config()
 
 // конфигурация
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '000000',
-    database: 'node_blog'
+    host: process.env.HOST,
+    user: process.env.USER,
+    password: process.env.PASS,
+    database: process.env.DATA_BASE
 });
 
 // connection.connect(err => {

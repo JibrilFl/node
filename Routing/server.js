@@ -1,20 +1,23 @@
 const express = require('express');
+const chalk = require('chalk');
 const morgan = require('morgan');
 const methodOverride = require('method-override');
 const postRoutes = require('./routes/post-routes');
+const postApiRoutes = require('./routes/api-post-routes');
 const contactRoutes = require('./routes/contact-routes');
 const createPath = require('./helpers/create-path');
 
 const app = express();
 
+const errorMsq = chalk.bgKeyword('white').redBright;
+const successMsq = chalk.bgKeyword('green').white;
+
 app.set('view engine', 'ejs');
 
 const PORT = 3000;
 
-
-
 app.listen(PORT, 'localhost', (error) => {
-    error ? console.log(error) : console.log(`listening port ${PORT}`);
+    error ? console.log(errorMsq(error)) : console.log(successMsq(`listening port ${PORT}`));
 });
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms')); // мидлвар логгер morgan
@@ -30,6 +33,7 @@ app.get('/', (req, res) => {
 
 app.use(postRoutes);
 app.use(contactRoutes);
+app.use(postApiRoutes);
 
 app.get('/home', (req, res) => {
     res.redirect('/');
